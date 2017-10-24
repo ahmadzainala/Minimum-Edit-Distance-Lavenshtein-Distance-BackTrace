@@ -1,0 +1,354 @@
+<html>
+<head>
+	<title>Minimum Edit Distance</title>
+	<meta charset="utf-8">
+  	<meta name="viewport" content="width=device-width, initial-scale=1">
+  	<link rel="stylesheet" href="css/main.css">
+  	<link rel="stylesheet" href="css/bootstrap.min.css">
+  	<link rel="stylesheet" href="css/font-awesome.min.css">  	
+	
+  	<script src="js/jquery.min.js"></script>
+  	<script src="js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div class="row"><h3>Minimum Editi Distance: LD Backtracke</h3></div>
+			<div class="row">
+				<div class="row">Input Kata Awal</div>
+				<div class="row">
+					<div class="col-md-4">
+						<input class="form-control" type="text" name="kAwal" id="kAwal">
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="row">Input Kata Tujuan</div>
+				<div class="row">
+					<div class="col-md-4">
+						<input class="form-control" type="text" name="kTujuan" id="kTujuan">
+					</div>
+				</div>
+			</div>
+			<div class="row"><button class="btn btn-info" colspan="2" name="submit" onclick="MED()">Submit</button></div>
+		<br>
+		<div id="petunjuk" style="font-size:12pt;"></div>
+		<div class="table-responsive" style="text-align:center;">
+		  <table class="table" id="result" style="font-size:24pt; text-align:center;">
+		    
+		  </table>
+		</div>
+		<br>
+		<br>
+		<div class="table-responsive" style="text-align:center;">
+		  <table class="table" id="awalmula" style="font-size:24pt">
+		    
+		  </table>
+		</div>
+		<br>
+		<div class="table-responsive" style="text-align:center;">
+		  <table class="table" id="track" style="text-align:center;">
+		    
+		  </table>
+		</div>
+	</div>
+	<script>
+	var fixI;
+	var fixJ;
+	var min = "Null";
+	var temp = new Array();
+	var jalurI = new Array();
+	var jalurJ = new Array();
+	var k=0;
+	function MED(){
+		var result = "";
+		min = "Null";
+		temp = new Array();
+		jalurI = new Array();
+		jalurJ = new Array();
+		k=0;
+		fixI = jalurI.slice();
+		fixJ = jalurJ.slice();
+		 document.getElementById("track").innerHTML = "";
+		 document.getElementById("awalmula").innerHTML = "";
+		 var kAwal = document.getElementById("kAwal").value;
+		 var kTujuan = document.getElementById("kTujuan").value;
+		 
+		var text = "";
+		var i;
+		var j;
+
+		//var x = [[],[]];
+		//alert(x[0][0][3]);
+		var x = new Array(kAwal.length+1);
+		for (i = 0; i <= kAwal.length; i++) {
+		  x[i] = new Array(kTujuan.length);
+		}
+
+		for (i = -1; i <= kAwal.length; i++) {
+			text += "<tr>";
+			for (j = -1; j <= kTujuan.length; j++) {
+				if(i == -1 || j == -1){
+					if(i>0){
+						text += "<td>"+kAwal.charAt(i-1)+"</td>";
+					}else if(j>0){
+						text += "<td>"+kTujuan.charAt(j-1)+"</td>";
+					}else if(j == -1 && i == -1){
+						text += "<td></td>";
+					}else{
+						text += "<td>#</td>";
+					}
+				}else if(j==0 && i == 0){
+					x[i][j] = [0, 0, 0, 0];
+					text += "<td>"+x[i][j][3]+"</td>";
+				}else if(i==0 && j > 0){
+					x[i][j] = [1, 0, 0, j];
+					text += "<td>"+x[i][j][3]+"</td>";
+				}else if(j==0 && i > 0){
+					x[i][j] = [0, 0, 1, i];
+					text += "<td>"+x[i][j][3]+"</td>";
+				}else if(j>0 && i>0){
+					var check = 2;
+					if(kAwal.charAt(i-1) == kTujuan.charAt(j-1)){
+						check = 0;
+					}
+					var Dbotom = x[i-1][j][3] + 1;
+					var Dleft = x[i][j-1][3] + 1;
+					var Ddiagonal = x[i-1][j-1][3] + check;
+					if(Dleft < Dbotom && Dleft < Ddiagonal){
+						x[i][j] = [1, 0, 0, Dleft];
+					}else if(Dbotom <Dleft && Dbotom <Ddiagonal){
+						x[i][j] = [0, 0, 1, Dbotom];
+					}else if(Ddiagonal <Dleft && Ddiagonal < Dbotom){
+						x[i][j] = [0, 1, 0, Ddiagonal];
+					}else if(Dleft == Dbotom && Dleft <Ddiagonal){
+						x[i][j] = [1, 0, 1, Dleft];
+					}else if(Dbotom < Dleft && Dbotom == Ddiagonal){
+						x[i][j] = [0, 1, 1, Dbotom];
+					}else if(Ddiagonal == Dleft && Dbotom > Ddiagonal){
+						x[i][j] = [1, 1, 0, Ddiagonal];
+					}else{
+						x[i][j] = [1, 1, 1, Ddiagonal];
+					}
+
+					text += "<td>";
+					if(x[i][j][0] == 1){
+						text += "<";
+					}
+					if(x[i][j][1] == 1){
+						text += "\\";
+					}
+					if(x[i][j][2] == 1){
+						text += "|";
+					}
+					text += x[i][j][3];
+					text += "</td>";
+					
+					//text += "<td>"+i+" "+j+"</td>";
+				}
+			}
+			text += "</tr>";
+		}
+		//var div3 = document.getElementById('awalmula');
+		//div3.innerHTML += text;
+
+		reqMED(x,kAwal.length,kTujuan.length,0);
+
+		document.getElementById("petunjuk").innerHTML = "";
+		var petunjuk = "";
+		petunjuk+="<div class='row'>Warna <text style='color:red;'>Merah</text> adalah <text style='color:red;'>Delete</text></div>";
+		petunjuk+="<div class='row'>Warna <text style='color:blue;'>Biru</text> adalah <text style='color:blue;'>Insert</text></div>";
+		petunjuk+="<div class='row'>Warna <text style='color:green;'>Hijau</text> adalah <text style='color:green;'>Match/Equivalen</text></div>";
+		petunjuk+="<div class='row'>Font <text style='font-style:italic;'>Miring</text> adalah <text style='font-style:italic;'>Subtitution</text></div>";
+		var div2 = document.getElementById('petunjuk');
+		div2.innerHTML += petunjuk;
+
+		
+		result+="<tr><th colspan='"+(fixI.length)+"' style='text-align:center;'>Tabel Hasil Minimum Edit Distance</th><tr>";
+		result+="<tr>";
+		for(i = fixI.length-1; i>0 ; i--){
+			//alert(fixI[i]+" "+kAwal[fixI[i]]);
+			if(fixI[i] == fixI[i-1] && fixJ[i] < fixJ[i-1]){
+				result+="<td style='color:blue;'>*</td>";
+			}else{
+				if(fixI[i] < fixI[i-1] && fixJ[i] == fixJ[i-1]){
+					result+= "<td style='color:red;'>"+kAwal[fixI[i]]+"</td>";
+					
+				}else{
+					if(kAwal[fixI[i]] == kTujuan[fixJ[i]]){
+						result+= "<td style='color:green;'>"+kAwal[fixI[i]]+"</td>";
+					}else{
+						result+= "<td style='font-style:italic;'>"+kAwal[fixI[i]]+"</td>";
+					}
+				}
+			}
+		}
+		result+="</tr>";
+		result+="<tr>";
+		for(i = fixI.length-1; i> 0; i--){
+			//alert(fixI[i]+"-"+fixJ[i]+" "+fixI[i-1]+"-"+fixJ[i-1]+" huruf>");
+			if(fixI[i] < fixI[i-1] && fixJ[i] == fixJ[i-1]){
+				result+="<td style='color:red;'>*</td>";
+			}else{
+				if(fixI[i] == fixI[i-1] && fixJ[i] < fixJ[i-1]){
+					result+= "<td style='color:blue;'>"+kTujuan[fixJ[i]]+"</td>";
+					
+				}else{
+					if(kAwal[fixI[i]] == kTujuan[fixJ[i]]){
+						result+= "<td style='color:green;'>"+kTujuan[fixJ[i]]+"</td>";
+					}else{
+						result+= "<td style='font-style:italic;'>"+kTujuan[fixJ[i]]+"</td>";
+					}
+				}
+			}
+			
+		}
+		result+="</tr>";
+		document.getElementById("result").innerHTML = "";
+		var div1 = document.getElementById('result');
+		div1.innerHTML += result;
+
+		var track ="";
+		var ll=0;
+		track+="<tr><th colspan='"+(kTujuan.length+2)+"' style='text-align:center;'>Tabel Perhitungan Minimum Edit Distance</th><tr>";
+		for(i = kAwal.length; i >= -1; i--){
+			track += "<tr>";
+			for(j = kTujuan.length; j >= -1 ; j--){
+				if(i == -1 || j == -1){
+					if(i>0){
+						track += "<td><h3>"+kAwal.charAt(i-1)+"</h3></td>";
+					}else if(j>0){
+						track += "<td><h3>"+kTujuan.charAt(j-1)+"</h3></td>";
+					}else if(j == -1 && i == -1){
+						track += "<td></td>";
+					}else{
+						track += "<td><h3>#</h3></td>";
+					}
+				}else if(j==0 && i == 0){
+					if(i == fixI[ll] && j == fixJ[ll]){
+						track += "<td><h3>"+x[i][j][3]+"</h3></td>";
+						ll++;
+					}else{
+						track += "<td>"+x[i][j][3]+"</td>";
+					}
+				}else if(i==0 && j > 0){
+					if(i == fixI[ll] && j == fixJ[ll]){
+						track += "<td><h3>"+x[i][j][3]+"></h3></td>";
+						ll++;
+					}else{
+						track += "<td>"+x[i][j][3]+"></td>";
+					}
+				}else if(j==0 && i > 0){
+					if(i == fixI[ll] && j == fixJ[ll]){
+						track += "<td><h3>"+x[i][j][3]+"|</h3></td>";
+						ll++;
+					}else{
+						track += "<td>"+x[i][j][3]+"|</td>";
+					}
+				}else if(j>0 && i>0){
+					if(i == fixI[ll] && j == fixJ[ll]){
+						track += "<td><h3>";
+						track += x[i][j][3];
+						if(x[i][j][0] == 1){
+							track += ">,";
+						}
+						if(x[i][j][1] == 1){
+							track += "\\,";
+						}
+						if(x[i][j][2] == 1){
+							track += "|,";
+						}
+						track += "</h3></td>";
+						ll++;
+					}else{
+						track += "<td>";
+						track += x[i][j][3];
+						if(x[i][j][0] == 1){
+							track += ">,";
+						}
+						if(x[i][j][1] == 1){
+							track += "\\,";
+
+						}
+						if(x[i][j][2] == 1){
+							track += "|,";
+						}
+						track += "</td>";
+					}
+					
+					
+					//text += "<td>"+i+" "+j+"</td>";
+				}
+			}
+			track += "</tr>";
+		}
+		
+
+		
+		
+		var div = document.getElementById('track');
+
+		div.innerHTML += track;
+		
+		
+	}
+
+	function reqMED(arrJalur,i,j,k){
+		if(k == 0){
+			jalurI[k] = i;
+			jalurJ[k] = j;
+			temp[k] = 0;
+			temp[k] += arrJalur[i][j][3];
+			k+=1;
+			//alert("i:"+i+" j:"+j+" k:"+k);
+		}
+		//alert("min="+min+" n="+temp[k-1]+" "+k+"<"+i+" "+j);
+		if(i == 0 && j == 0){
+			//alert("goal!");
+			if(min == "Null" || min > temp[k-1]){
+				fixI = jalurI.slice();
+				fixJ = jalurJ.slice();
+				min = temp[k-1];
+				//alert(min+"<< jalur:"+fixI+"|||"+fixJ+"> i:"+i+" j:"+j+" k:"+k);
+			}
+		}
+		
+		
+		if(arrJalur[i][j][1] == 1 && j > 0 && i > 0){
+			temp[k] = temp[k-1] + arrJalur[i-1][j-1][3];
+			j-=1;
+			i-=1;
+			jalurI[k] = i;
+			jalurJ[k] = j;
+			k+=1;
+				
+			reqMED(arrJalur,i,j,k);
+		}
+
+
+		if(arrJalur[i][j][0] == 1 && j > 0){
+			temp[k] = temp[k-1] + arrJalur[i][j-1][3];
+			j-=1;
+			jalurI[k] = i;
+			jalurJ[k] = j;
+			k+=1;
+									
+			reqMED(arrJalur,i,j,k);
+		}
+
+		if(arrJalur[i][j][2] == 1 && i > 0 ){
+			temp[k] = temp[k-1] + arrJalur[i-1][j][3];
+			i-=1;
+			jalurI[k] = i;
+			jalurJ[k] = j;
+			k+=1;
+					
+				
+			reqMED(arrJalur,i,j,k);
+		}
+
+		
+	}
+</script>
+</body>
+
+</html>
